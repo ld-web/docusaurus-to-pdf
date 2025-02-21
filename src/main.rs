@@ -139,10 +139,11 @@ async fn collect_chapters(
             let btn = item.find_element(".clean-btn").await;
 
             if btn.is_err() {
-                continue;
+                menu_link.click().await?;
+            } else {
+                btn.unwrap().click().await?;
             }
 
-            btn.unwrap().click().await?;
             thread::sleep(Duration::from_millis(300));
 
             chapters.extend(Box::pin(collect_chapters(item, Some(position))).await?);
