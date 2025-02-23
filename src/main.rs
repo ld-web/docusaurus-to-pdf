@@ -16,8 +16,7 @@ use url::Url;
 #[derive(Parser, Debug)]
 struct Args {
     /// Initial URL to crawl
-    #[arg(short, long)]
-    initial_url: String,
+    initial_docs_url: String,
 
     /// Output directory
     #[arg(short, long, default_value = "pdfs")]
@@ -54,7 +53,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     });
 
-    let base_url = get_base_url(&args.initial_url);
+    let base_url = get_base_url(&args.initial_docs_url);
     let page = browser.new_page("about:blank").await?;
 
     page.execute(
@@ -64,7 +63,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await?;
 
-    page.goto(&args.initial_url).await?;
+    page.goto(&args.initial_docs_url).await?;
 
     println!("Collecting chapters...");
     let main_side_menu = page.find_element(".theme-doc-sidebar-menu").await?;

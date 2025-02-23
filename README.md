@@ -7,5 +7,12 @@ Small utility to crawl a Docusaurus v3 website and create a folder with each cha
 ## Usage
 
 ```bash
-dcsrs-to-pdf --initial-url https://your-website.com[/sub-folder] [--output-dir directory]
+# output dir defaults to "pdfs"
+dcsrs-to-pdf <initial-docs-url> --output-dir <output-dir>
+```
+
+## Example
+
+```bash
+dcsrs-to-pdf https://your-website.com/docs --output-dir docs
 ```
