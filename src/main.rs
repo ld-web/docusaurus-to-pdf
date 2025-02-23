@@ -165,9 +165,8 @@ fn get_chapter_position(idx: usize, parent_position: &Option<String>) -> String 
 }
 
 async fn is_category(elt: &Element) -> bool {
-    elt.attribute("class")
-        .await
-        .unwrap()
-        .unwrap()
-        .contains("theme-doc-sidebar-item-category")
+    match elt.attribute("class").await {
+        Ok(Some(css_classes)) => css_classes.contains("theme-doc-sidebar-item-category"),
+        _ => false,
+    }
 }
