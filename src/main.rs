@@ -95,7 +95,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         handles.push(async_std::task::spawn(async move {
             page.goto(&chapter_url).await.unwrap();
-            thread::sleep(Duration::from_millis(400));
+            thread::sleep(Duration::from_secs(1));
             let pdf = page.pdf(PrintToPdfParams::default()).await.unwrap();
             fs::write(dest_file, pdf).unwrap();
         }));
