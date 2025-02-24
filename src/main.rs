@@ -135,13 +135,8 @@ async fn collect_chapters(
         chapters.push(chapter);
 
         if is_category(item).await {
-            let btn = item.find_element(".clean-btn").await;
-
-            if btn.is_err() {
-                menu_link.click().await?;
-            } else {
-                btn.unwrap().click().await?;
-            }
+            let expander_element = item.find_element(".clean-btn").await.unwrap_or(menu_link);
+            expander_element.click().await?;
 
             thread::sleep(Duration::from_millis(300));
 
