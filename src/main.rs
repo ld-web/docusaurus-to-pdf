@@ -7,9 +7,8 @@ use std::{
 use chromiumoxide::{cdp::browser_protocol::page::PrintToPdfParams, Element};
 use clap::Parser;
 
-use url::Url;
-
 mod browser;
+mod util;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -34,11 +33,10 @@ struct Chapter {
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let start = Instant::now();
-
     let args = Args::parse();
-    let (mut browser, handle) = browser::get_browser_and_handle().await?;
 
-    let base_url = get_base_url(&args.initial_docs_url);
+    let (mut browser, handle) = browser::get_browser_and_handle().await?;
+    let base_url = util::get_base_url(&args.initial_docs_url);
     let page = browser::get_new_page(&browser, true).await?;
     page.goto(&args.initial_docs_url).await?;
 
@@ -115,11 +113,6 @@ async fn collect_chapters(
     }
 
     Ok(chapters)
-}
-
-fn get_base_url(url: &str) -> String {
-    let parsed_url = Url::parse(url).expect("Couldn't parse URL");
-    parsed_url.scheme().to_owned() + "://" + parsed_url.host_str().unwrap()
 }
 
 fn get_chapter_position(idx: usize, parent_position: &Option<String>) -> String {
