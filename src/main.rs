@@ -4,14 +4,12 @@ use std::{
     time::{Duration, Instant},
 };
 
-use chromiumoxide::{
-    browser::BrowserConfigBuilder,
-    cdp::browser_protocol::page::{AddScriptToEvaluateOnNewDocumentParams, PrintToPdfParams},
-    Browser, Element,
-};
+use chromiumoxide::{cdp::browser_protocol::page::PrintToPdfParams, Element};
 use clap::Parser;
-use futures::StreamExt;
+
 use url::Url;
+
+mod browser;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -38,39 +36,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let start = Instant::now();
 
     let args = Args::parse();
-    let config = BrowserConfigBuilder::default()
-        .window_size(1200, 600)
-        .viewport(None)
-        // .headless_mode(chromiumoxide::browser::HeadlessMode::False)
-        .build()?;
-    let (mut browser, mut handler) = Browser::launch(config).await?;
-
-    let handle = async_std::task::spawn(async move {
-        while let Some(h) = handler.next().await {
-            if h.is_err() {
-                break;
-            }
-        }
-    });
+    let (mut browser, handle) = browser::get_browser_and_handle().await?;
 
     let base_url = get_base_url(&args.initial_docs_url);
-    let page = browser.new_page("about:blank").await?;
-
-    page.execute(
-        AddScriptToEvaluateOnNewDocumentParams::builder()
-            .source("window.scrollTo(0, document.body.scrollHeight);")
-            .build()?,
-    )
-    .await?;
-
+    let page = browser::get_new_page(&browser, true).await?;
     page.goto(&args.initial_docs_url).await?;
 
     println!("Collecting chapters...");
     let main_side_menu = page.find_element(".theme-doc-sidebar-menu").await?;
     let chapters = collect_chapters(&main_side_menu, None).await?;
-    println!("Chapters: {:?}", chapters.len());
+    println!("Chapters found: {:?}", chapters.len());
 
-    println!("Generating PDF...");
+    println!("Generating PDF files in {}...", args.output_dir);
     fs::create_dir_all(&args.output_dir)?;
     let mut handles = Vec::new();
 
@@ -84,14 +61,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "{}/{} - {}.pdf",
             args.output_dir, chapter.position, chapter.label
         );
-        let page = browser.new_page("about:blank").await?;
-
-        page.execute(
-            AddScriptToEvaluateOnNewDocumentParams::builder()
-                .source("window.scrollTo(0, document.body.scrollHeight);")
-                .build()?,
-        )
-        .await?;
+        let page = browser::get_new_page(&browser, true).await?;
 
         handles.push(async_std::task::spawn(async move {
             page.goto(&chapter_url).await.unwrap();
