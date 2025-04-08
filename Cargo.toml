@@ -9,3 +9,4 @@ async-std = { version = "1.13.0", features = ["attributes"] }
 chromiumoxide = { git = "https://github.com/mattsse/chromiumoxide", branch = "main" }
 futures = "0.3.31"
 url = "2.5.4"
+slugify = "0.1.0"

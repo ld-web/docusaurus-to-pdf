@@ -1,5 +1,6 @@
 use std::{error::Error, fs, time::Instant};
 
+extern crate slugify;
 use clap::Parser;
 
 mod browser;

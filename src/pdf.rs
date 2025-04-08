@@ -3,6 +3,7 @@ use chromiumoxide::Browser;
 
 use crate::browser;
 use crate::docusaurus::Chapter;
+use slugify::slugify;
 use std::error::Error;
 use std::fs;
 use std::thread;
@@ -26,7 +27,7 @@ pub async fn generate_pdfs(
             "{}/{} - {}.pdf",
             output_dir,
             chapter.position,
-            chapter.label().await?
+            slugify!(&chapter.label().await?)
         );
         let page = browser::get_new_page(browser, true).await?;
 
